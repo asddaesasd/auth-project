@@ -69,38 +69,12 @@ function calculateExpiration(type, customDays = null) {
 
 // Authentication middleware
 async function authenticateAdmin(req, res, next) {
-    try {
-        // For GET requests, we'll skip authentication for now
-        // In a production environment, you should use a more secure method
-        // like JWT tokens or session cookies
-        if (req.method === 'GET') {
-            return next();
-        }
-
-        const { username, password } = req.body;
-
-        if (!username || !password) {
-            return res.status(401).json({ success: false, message: 'Authentication required' });
-        }
-
-        const snapshot = await adminsRef.child(username).once('value');
-        if (!snapshot.exists()) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
-        }
-
-        const adminData = snapshot.val();
-
-        // In a real application, you should use a proper password hashing method
-        // This is a simplified example
-        if (adminData.password !== password) {
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
-        }
-
-        next();
-    } catch (error) {
-        console.error('Authentication error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
+    // Allow only username and password both equal to '1'
+    const { username, password } = req.body;
+    if (username === '1' && password === '1') {
+        return next();
     }
+    return res.status(401).json({ success: false, message: 'Invalid credentials (dev override)' });
 }
 
 // Initialize admin if none exists
@@ -141,51 +115,19 @@ async function initializeDefaultApp() {
 
 // Admin login
 app.post('/api/admin/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        console.log(`Login attempt for username: ${username}`);
-
-        if (!username || !password) {
-            console.log('Missing username or password');
-            return res.status(400).json({ success: false, message: 'Username and password are required' });
-        }
-
-        // Debug: Check if admins node exists
-        const adminsSnapshot = await adminsRef.once('value');
-        console.log('Admins node exists:', adminsSnapshot.exists());
-        console.log('Admins data:', adminsSnapshot.val());
-
-        const snapshot = await adminsRef.child(username).once('value');
-        console.log('User exists:', snapshot.exists());
-
-        if (!snapshot.exists()) {
-            console.log(`Admin user '${username}' not found`);
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
-        }
-
-        const adminData = snapshot.val();
-        console.log('Admin data found:', adminData);
-
-        // In a real application, you should use a proper password hashing method
-        if (adminData.password !== password) {
-            console.log('Password mismatch');
-            return res.status(401).json({ success: false, message: 'Invalid credentials' });
-        }
-
-        console.log('Login successful');
-        res.json({
+    // Allow only username and password both equal to '1'
+    const { username, password } = req.body;
+    if (username === '1' && password === '1') {
+        return res.json({
             success: true,
-            message: 'Login successful',
+            message: 'Login successful (dev override)',
             admin: {
-                username,
-                role: adminData.role
+                username: '1',
+                role: 'admin'
             }
         });
-    } catch (error) {
-        console.error('Login error:', error);
-        res.status(500).json({ success: false, message: 'Server error' });
     }
+    return res.status(401).json({ success: false, message: 'Invalid credentials (dev override)' });
 });
 
 // Create a new key
